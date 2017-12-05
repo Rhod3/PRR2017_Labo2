@@ -48,7 +48,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         fileTimeStamp[me] = ++logicalClock;
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
-                send(MessageType.REQUEST, j);
+                Message receipt = send(MessageType.REQUEST, j);
+                receive(receipt);
             }
         }
 
@@ -63,22 +64,24 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
     }
 
-    public void end() {
+    public void end(int newSharedValue) {
         fileMessage[me] = MessageType.FREE;
         fileTimeStamp[me] = logicalClock;
 
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
-                send(MessageType.FREE, j);
+                send(MessageType.FREE, newSharedValue, j);
             }
         }
         csGranted = false;
     }
 
-    public void receive(Message message) {
+    public Message receive(Message message) {
         MessageType messageType = message.getMessageType();
         int timeStamp = message.getTimeStamp();
         int sender = message.getSender();
+
+        Message messageRet = null;
 
         logicalClock = Math.max(logicalClock, timeStamp) + 1;
 
@@ -87,7 +90,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 fileMessage[sender] = MessageType.REQUEST;
                 fileTimeStamp[sender] = timeStamp;
 
-                send(MessageType.RECEIPT, sender);
+                messageRet = new Message(MessageType.RECEIPT, logicalClock, sender);
+
                 break;
 
             case RECEIPT:
@@ -106,14 +110,25 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         }
 
         csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
+
         if (csGranted && waiting) {
             waiting = false;
             csGranted = true;
             notify();
         }
+
+        return messageRet;
     }
 
-    public void send(MessageType messageType, int destination) {
+    private Message send(MessageType messageType, int sharedValue, int destination) {
+        return send(new MessageFree(messageType, logicalClock, me, sharedValue), destination);
+    }
+
+    private Message send(MessageType messageType, int destination) {
+        return send(new Message(messageType, logicalClock, me), destination);
+    }
+
+    private Message send(Message message, int destination) {
         try {
             // Getting the registry
             // Registry registry = LocateRegistry.getRegistry(10999);
@@ -122,10 +137,9 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             ILamport lamport = (ILamport) Naming.lookup("Handler" + destination);
 
             // Calling the remote method using the obtained object
-            if (messageType == MessageType.FREE)
-                lamport.receive(new MessageFree(messageType, logicalClock, me, sharedValue));
-            else
-                lamport.receive(new Message(messageType, logicalClock, me));
+
+            return lamport.receive(message);
+
 
             // System.out.println("Remote method invoked");
         } catch (Exception e) {
@@ -133,6 +147,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             e.printStackTrace();
 
         }
+
+        return null;
     }
 
     public void test() {
