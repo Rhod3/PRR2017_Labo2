@@ -1,10 +1,7 @@
-import remoteInterfaces.Hello;
 import remoteInterfaces.IAppCom;
 import remoteInterfaces.ILamport;
 
 import java.rmi.Naming;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class App {
 

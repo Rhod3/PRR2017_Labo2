@@ -1,15 +1,7 @@
-import remoteInterfaces.Hello;
-
 import java.rmi.Naming;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 
-public class Server extends ImplExample {
-
-    protected Server() throws RemoteException {
-    }
+public class Server {
 
     public static void main(String args[]) {
         if ( args.length != 2 ) {
