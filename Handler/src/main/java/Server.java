@@ -1,5 +1,6 @@
 import remoteInterfaces.Hello;
 
+import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -7,7 +8,10 @@ import java.rmi.server.UnicastRemoteObject;
 public class Server extends ImplExample {
     public Server() {}
     public static void main(String args[]) {
-        try {
+        try
+        {
+            // System.setSecurityManager(new SecurityManager());
+
             // Instantiating the implementation class
             ImplExample obj = new ImplExample();
 
@@ -16,11 +20,12 @@ public class Server extends ImplExample {
             Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, 0);
 
             // Binding the remote object (stub) in the registry
-            Registry registry = LocateRegistry.getRegistry();
+            Registry registry = LocateRegistry.createRegistry(1099);
 
             registry.bind("Hello", stub);
             System.err.println("Server ready");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();
         }
