@@ -9,10 +9,10 @@ public class Tache {
     public static void main(String[] args) {
         try {
             // Getting the registry
-            Registry registry = LocateRegistry.getRegistry("localhost");
+            // Registry registry = LocateRegistry.getRegistry(10999);
 
             // Looking up the registry for the remote object
-            Hello stub = (Hello) registry.lookup("Hello");
+            Hello stub = (Hello) Naming.lookup("Hello");
 
             // Calling the remote method using the obtained object
             stub.printMsg();
