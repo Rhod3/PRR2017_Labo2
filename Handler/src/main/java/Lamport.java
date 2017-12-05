@@ -1,7 +1,12 @@
+import remoteInterfaces.ILamport;
+import utils.Message;
 import utils.MessageType;
 
-public class Lamport {
-    private static int id = 0;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+public class Lamport extends UnicastRemoteObject implements ILamport {
+
     private MessageType[] fileMessage;
     private int[] fileTimeStamp;
     private int numberSite;
@@ -9,9 +14,10 @@ public class Lamport {
     private int logicalClock;
     private boolean csGranted;
 
-    public Lamport(int numberSite) {
+    public Lamport(int personalNumber, int numberSite) throws RemoteException {
+        super();
         this.numberSite = numberSite;
-        this.me = id++;
+        this.me = personalNumber;
         this.logicalClock = 0;
         this.csGranted = false;
         fileMessage = new MessageType[numberSite];
@@ -91,4 +97,11 @@ public class Lamport {
     }
 
 
+    public void test() {
+        System.out.println("Test Lamport");
+    }
+
+    public void receive(Message message) {
+
+    }
 }
