@@ -1,6 +1,8 @@
+import utils.MessageType;
+
 public class Lamport {
     private static int id = 0;
-    private Message[] fileMessage;
+    private MessageType[] fileMessage;
     private int[] fileTimeStamp;
     private int numberSite;
     private int me;
@@ -12,7 +14,7 @@ public class Lamport {
         this.me = id++;
         this.logicalClock = 0;
         this.csGranted = false;
-        fileMessage = new Message[numberSite];
+        fileMessage = new MessageType[numberSite];
         fileTimeStamp = new int[numberSite];
     }
 
@@ -30,11 +32,11 @@ public class Lamport {
     }
 
     public void demande() {
-        fileMessage[me] = Message.REQUEST;
+        fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
-                send(Message.REQUEST, j);
+                send(MessageType.REQUEST, j);
             }
         }
 
@@ -46,45 +48,45 @@ public class Lamport {
     }
 
     public void end() {
-        fileMessage[me] = Message.FREE;
+        fileMessage[me] = MessageType.FREE;
         fileTimeStamp[me] = logicalClock;
 
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
-                send(Message.FREE, j);
+                send(MessageType.FREE, j);
             }
         }
         csGranted = false;
     }
 
-    public void receive(Message messageType, int timeStamp, int sender) {
+    public void receive(MessageType messageType, int timeStamp, int sender) {
         logicalClock = Math.max(logicalClock, timeStamp) + 1;
         switch (messageType) {
             case REQUEST:
-                fileMessage[sender] = Message.REQUEST;
+                fileMessage[sender] = MessageType.REQUEST;
                 fileTimeStamp[sender] = timeStamp;
 
-                send(Message.RECEIPT, sender);
+                send(MessageType.RECEIPT, sender);
                 break;
 
             case RECEIPT:
-                if (fileMessage[sender] != Message.REQUEST) {
-                    fileMessage[sender] = Message.RECEIPT;
+                if (fileMessage[sender] != MessageType.REQUEST) {
+                    fileMessage[sender] = MessageType.RECEIPT;
                     fileTimeStamp[sender] = timeStamp;
                 }
                 break;
 
             case FREE:
-                fileMessage[sender] = Message.FREE;
+                fileMessage[sender] = MessageType.FREE;
                 fileTimeStamp[sender] = timeStamp;
 
                 break;
         }
 
-        csGranted = fileMessage[me] == Message.REQUEST && permission(me);
+        csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
     }
 
-    public void send(Message message, int destination) {
+    public void send(MessageType message, int destination) {
         // ENVOIE((message, logicalClock, me), destination);
     }
 
