@@ -1,7 +1,9 @@
 import remoteInterfaces.ILamport;
 import utils.Message;
+import utils.MessageFree;
 import utils.MessageType;
 
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -108,7 +110,6 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             // Looking up the registry for the remote object
             ILamport lamport = (ILamport) Naming.lookup("Handler" + destination);
 
-<<<<<<<HEAD
             // Calling the remote method using the obtained object
             if (messageType == MessageType.FREE)
                 lamport.receive(new MessageFree(messageType, logicalClock, me, sharedValue));
@@ -121,13 +122,10 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             e.printStackTrace();
 
         }
-=======
-        public void test () {
-            System.out.println("Test Lamport");
-        }
-
-    public void receive(Message message) {
-
->>>>>>>b73d9dcecb49bfda497e3d2d90b6c4370aeb72b2
     }
+
+    public void test() {
+        System.out.println("Test Lamport");
+    }
+
 }
