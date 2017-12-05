@@ -12,6 +12,11 @@ public class Server extends ImplExample {
     }
 
     public static void main(String args[]) {
+        if ( args.length != 2 ) {
+            System.out.println("Invalid arguments, you need to pass a site number and the total number of site");
+            return;
+        }
+
         try
         {
             // System.setSecurityManager(new SecurityManager());
@@ -19,8 +24,14 @@ public class Server extends ImplExample {
             // Instantiating the implementation class
             ImplExample obj = new ImplExample();
 
+            Lamport lamport = new Lamport(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+            AppCom appCom = new AppCom();
+
+
             // Binding the remote object (stub) in the registry
             LocateRegistry.createRegistry(1099);
+            Naming.rebind("Lamport", lamport);
+            Naming.rebind("AppCom", appCom);
             Naming.rebind("Hello", obj);
 
             System.err.println("Server ready");

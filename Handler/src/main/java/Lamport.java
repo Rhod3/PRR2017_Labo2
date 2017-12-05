@@ -1,11 +1,12 @@
 import remoteInterfaces.ILamport;
 import utils.Message;
-import utils.MessageFree;
 import utils.MessageType;
 
-import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-public class Lamport {
+public class Lamport extends UnicastRemoteObject implements ILamport {
+
     private MessageType[] fileMessage;
     private int[] fileTimeStamp;
     private int numberSite;
@@ -14,10 +15,11 @@ public class Lamport {
     private boolean csGranted;
     private int sharedValue;
 
-    public Lamport(int numberSite, int me) {
-        this.sharedValue = 0;
+
+    public Lamport(int personalNumber, int numberSite) throws RemoteException {
+        super();
         this.numberSite = numberSite;
-        this.me = me;
+        this.me = personalNumber;
         this.logicalClock = 0;
         this.csGranted = false;
         fileMessage = new MessageType[numberSite];
@@ -106,6 +108,7 @@ public class Lamport {
             // Looking up the registry for the remote object
             ILamport lamport = (ILamport) Naming.lookup("Handler" + destination);
 
+<<<<<<<HEAD
             // Calling the remote method using the obtained object
             if (messageType == MessageType.FREE)
                 lamport.receive(new MessageFree(messageType, logicalClock, me, sharedValue));
@@ -118,5 +121,13 @@ public class Lamport {
             e.printStackTrace();
 
         }
+=======
+        public void test () {
+            System.out.println("Test Lamport");
+        }
+
+    public void receive(Message message) {
+
+>>>>>>>b73d9dcecb49bfda497e3d2d90b6c4370aeb72b2
     }
 }

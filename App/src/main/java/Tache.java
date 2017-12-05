@@ -1,4 +1,6 @@
 import remoteInterfaces.Hello;
+import remoteInterfaces.IAppCom;
+import remoteInterfaces.ILamport;
 
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
@@ -12,10 +14,12 @@ public class Tache {
             // Registry registry = LocateRegistry.getRegistry(10999);
 
             // Looking up the registry for the remote object
-            Hello stub = (Hello) Naming.lookup("Hello");
+            IAppCom appCom = (IAppCom) Naming.lookup("AppCom");
+            ILamport lamport = (ILamport) Naming.lookup("Lamport");
 
             // Calling the remote method using the obtained object
-            stub.printMsg();
+            appCom.test();
+            lamport.test();
 
             // System.out.println("Remote method invoked");
         }
