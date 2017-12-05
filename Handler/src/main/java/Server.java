@@ -15,7 +15,6 @@ public class Server {
             Lamport lamport = new Lamport(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
             AppCom appCom = new AppCom();
 
-
             // Binding the remote object (stub) in the registry
             LocateRegistry.createRegistry(1099);
             Naming.rebind("Lamport", lamport);

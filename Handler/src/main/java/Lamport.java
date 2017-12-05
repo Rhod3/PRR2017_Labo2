@@ -17,6 +17,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     private boolean csGranted;
     private int sharedValue;
 
+    private boolean waiting = false;
+
 
     public Lamport(int personalNumber, int numberSite) throws RemoteException {
         super();
@@ -41,7 +43,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         return granted;
     }
 
-    public void demande() {
+    public void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
         for (int j = 0; j < numberSite; ++j) {
@@ -51,6 +53,10 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         }
 
         csGranted = permission(me);
+        if (!csGranted) {
+            waiting = true;
+            wait(); // We are notified by the receive method, where csGranted is set to true.
+        }
     }
 
     public void waitDuringCs() {
@@ -100,6 +106,11 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         }
 
         csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
+        if (csGranted && waiting) {
+            waiting = false;
+            csGranted = true;
+            notify();
+        }
     }
 
     public void send(MessageType messageType, int destination) {
