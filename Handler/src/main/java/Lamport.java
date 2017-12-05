@@ -1,7 +1,9 @@
 import remoteInterfaces.ILamport;
 import utils.Message;
+import utils.MessageFree;
 import utils.MessageType;
 
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -13,6 +15,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     private int me;
     private int logicalClock;
     private boolean csGranted;
+    private int sharedValue;
+
 
     public Lamport(int personalNumber, int numberSite) throws RemoteException {
         super();
@@ -65,8 +69,13 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         csGranted = false;
     }
 
-    public void receive(MessageType messageType, int timeStamp, int sender) {
+    public void receive(Message message) {
+        MessageType messageType = message.getMessageType();
+        int timeStamp = message.getTimeStamp();
+        int sender = message.getSender();
+
         logicalClock = Math.max(logicalClock, timeStamp) + 1;
+
         switch (messageType) {
             case REQUEST:
                 fileMessage[sender] = MessageType.REQUEST;
@@ -86,22 +95,37 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 fileMessage[sender] = MessageType.FREE;
                 fileTimeStamp[sender] = timeStamp;
 
+                sharedValue = ((MessageFree) message).getNewSharedValue();
                 break;
         }
 
         csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
     }
 
-    public void send(MessageType message, int destination) {
-        // ENVOIE((message, logicalClock, me), destination);
-    }
+    public void send(MessageType messageType, int destination) {
+        try {
+            // Getting the registry
+            // Registry registry = LocateRegistry.getRegistry(10999);
 
+            // Looking up the registry for the remote object
+            ILamport lamport = (ILamport) Naming.lookup("Handler" + destination);
+
+            // Calling the remote method using the obtained object
+            if (messageType == MessageType.FREE)
+                lamport.receive(new MessageFree(messageType, logicalClock, me, sharedValue));
+            else
+                lamport.receive(new Message(messageType, logicalClock, me));
+
+            // System.out.println("Remote method invoked");
+        } catch (Exception e) {
+            System.err.println("Handler exception: " + e.toString());
+            e.printStackTrace();
+
+        }
+    }
 
     public void test() {
         System.out.println("Test Lamport");
     }
 
-    public void receive(Message message) {
-
-    }
 }
