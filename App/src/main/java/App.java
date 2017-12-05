@@ -6,7 +6,7 @@ import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class Tache {
+public class App {
 
     public static void main(String[] args) {
         try {
@@ -21,7 +21,11 @@ public class Tache {
             appCom.test();
             lamport.test();
 
-            // System.out.println("Remote method invoked");
+            System.out.println("Value before set: " + appCom.getValue());
+            appCom.getCriticalSectionExclusion();
+            appCom.setValue(2);
+            appCom.releaseCriticalSectionExclusion();
+            System.out.println("Value after set: " + appCom.getValue());
         }
         catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
