@@ -18,7 +18,7 @@ public class Server {
         {
             // Instantiating the implementation class
             Lamport lamport = new Lamport(siteId, numberOfSites);
-            AppCom appCom = new AppCom();
+            AppCom appCom = new AppCom(siteId);
 
             // Binding the remote object (stub) in the registry
             LocateRegistry.createRegistry(1099);

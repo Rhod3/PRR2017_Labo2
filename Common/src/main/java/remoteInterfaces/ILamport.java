@@ -7,7 +7,7 @@ import utils.Message;
 
 public interface ILamport extends Remote {
     void test() throws RemoteException;
-    void demande() throws InterruptedException;
+    void demande() throws InterruptedException, RemoteException;
     Message receive(Message message) throws RemoteException;
-    void end(int newSharedValue);
+    void end(int newSharedValue) throws RemoteException;
 }

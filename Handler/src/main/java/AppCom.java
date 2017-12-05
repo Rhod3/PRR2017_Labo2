@@ -1,16 +1,20 @@
 import remoteInterfaces.IAppCom;
 import remoteInterfaces.ILamport;
+import utils.Constants;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 public class AppCom extends UnicastRemoteObject implements IAppCom {
 
-    int value = 0;
-    ILamport lamport;
+    private int siteId;
+    private int value = 0;
 
-    protected AppCom() throws RemoteException {
-
+    public AppCom(int siteId) throws RemoteException, MalformedURLException, NotBoundException {
+        this.siteId = siteId;
     }
 
     public void test() {
@@ -23,8 +27,26 @@ public class AppCom extends UnicastRemoteObject implements IAppCom {
     }
 
     public void setValue(int value) throws RemoteException {
-        System.out.println("Value set to : " + value);
-        this.value = value;
+        try {
+            String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + siteId;
+            ILamport lamport = (ILamport) Naming.lookup(urlLamport);
+
+            lamport.demande();
+
+            System.out.println("Value set to : " + value);
+            this.value = value;
+
+            lamport.end(value);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        catch (NotBoundException e) {
+            e.printStackTrace();
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void getCriticalSectionExclusion() throws RemoteException {
