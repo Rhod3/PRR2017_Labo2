@@ -44,7 +44,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         return granted;
     }
 
-    public void demande() throws InterruptedException {
+    synchronized public void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
         for (int j = 0; j < numberSite; ++j) {
@@ -55,7 +55,9 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         }
 
         csGranted = permission(me);
+
         if (!csGranted) {
+            System.out.println("Waiting for SC");
             waiting = true;
             wait(); // We are notified by the receive method, where csGranted is set to true.
         }
@@ -113,9 +115,12 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
 
         if (csGranted && waiting) {
+            System.out.println("Entering the release of lock");
             waiting = false;
             csGranted = true;
-            notify();
+            synchronized (this) {
+                notify();
+            }
         }
 
         return messageRet;
@@ -137,8 +142,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
             // Calling the remote method using the obtained object
             return lamport.receive(message);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("Handler exception: " + e.toString());
             e.printStackTrace();
         }
