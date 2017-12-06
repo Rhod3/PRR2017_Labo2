@@ -131,23 +131,16 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
     private Message send(Message message, int destination) {
         try {
-            // Getting the registry
-            // Registry registry = LocateRegistry.getRegistry(10999);
-
             // Looking up the registry for the remote object
             String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + destination;
             ILamport lamport = (ILamport) Naming.lookup(urlLamport);
 
             // Calling the remote method using the obtained object
-
             return lamport.receive(message);
-
-
-            // System.out.println("Remote method invoked");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("Handler exception: " + e.toString());
             e.printStackTrace();
-
         }
 
         return null;
