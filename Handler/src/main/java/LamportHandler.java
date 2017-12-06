@@ -79,7 +79,7 @@ public class LamportHandler extends UnicastRemoteObject implements IHandler {
 
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
-                /* Lorsqu'on envoie un message, on profite de RMI pour directement récupérer la quitance.
+                /* Lorsqu'on envoie un message, on profite de RMI pour directement récupérer la quittance.
                  * On recupère donc la réponse et on appelle la fonction receive pour la traiter
                  */
                 Message receipt = send(MessageType.REQUEST, j);
@@ -135,7 +135,7 @@ public class LamportHandler extends UnicastRemoteObject implements IHandler {
                 fileMessage[sender] = MessageType.REQUEST;
                 fileTimeStamp[sender] = timeStamp;
 
-                /* On crée le message de la quitance avant de le retourner. */
+                /* On crée le message de la quittance avant de le retourner. */
                 messageRet = new Message(MessageType.RECEIPT, logicalClock, me);
 
                 break;
