@@ -2,6 +2,8 @@ import utils.Constants;
 
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.Locale;
 
 public class Server {
 
@@ -13,6 +15,7 @@ public class Server {
         int siteId = Integer.parseInt(args[0]);
         int port = Constants.DEFAULT_PORT;
         int numberOfSites = Integer.parseInt(args[1]);
+        boolean remoteObjectBound = false;
 
         try
         {
@@ -21,12 +24,20 @@ public class Server {
             AppCom appCom = new AppCom(siteId);
 
             // Binding the remote object (stub) in the registry
-            LocateRegistry.createRegistry(1099);
-
-            String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
-            String urlAppCom = Constants.LOCALHOST_RMI_URL + port + "/AppCom" + siteId;
-            Naming.rebind(urlLamport, lamport);
-            Naming.rebind(urlAppCom, appCom);
+            while (!remoteObjectBound) {
+                try {
+                    // Registry registry = LocateRegistry.getRegistry(1099);
+                    String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
+                    String urlAppCom = Constants.LOCALHOST_RMI_URL + port + "/AppCom" + siteId;
+                    Naming.rebind(urlLamport, lamport);
+                    Naming.rebind(urlAppCom, appCom);
+                    remoteObjectBound = true;
+                }
+                catch (Exception e) {
+                    System.out.println("No RMI Registry running ! Creating...");
+                    LocateRegistry.createRegistry(1099);
+                }
+            }
 
             System.err.println("Server ready");
         }

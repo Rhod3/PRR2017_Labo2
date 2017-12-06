@@ -1,4 +1,5 @@
 import remoteInterfaces.ILamport;
+import utils.Constants;
 import utils.Message;
 import utils.MessageFree;
 import utils.MessageType;
@@ -134,7 +135,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             // Registry registry = LocateRegistry.getRegistry(10999);
 
             // Looking up the registry for the remote object
-            ILamport lamport = (ILamport) Naming.lookup("Handler" + destination);
+            String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + destination;
+            ILamport lamport = (ILamport) Naming.lookup(urlLamport);
 
             // Calling the remote method using the obtained object
 

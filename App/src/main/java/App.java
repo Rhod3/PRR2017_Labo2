@@ -30,11 +30,11 @@ public class App {
             appCom.test();
             lamport.test();
 
-            System.out.println("Value before set: " + appCom.getValue());
+            System.out.println(String.format("App %d, Value before set: %s", siteId, appCom.getValue()));
             appCom.getCriticalSectionExclusion();
             appCom.setValue(2);
             appCom.releaseCriticalSectionExclusion();
-            System.out.println("Value after set: " + appCom.getValue());
+            System.out.println(String.format("App %d, Value after set: %s", siteId, appCom.getValue()));
         }
         catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
