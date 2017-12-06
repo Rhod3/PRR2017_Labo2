@@ -47,14 +47,16 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     synchronized public void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
-        System.out.println("Lamport.demande - envoie des messages et récupération des receipt");
+        System.out.println("Lamport.demande - Sending request and receiving receipt");
+
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
                 Message receipt = send(MessageType.REQUEST, j);
                 receive(receipt);
             }
         }
-        System.out.println("Lamport.demande - récupération de la permission");
+
+        System.out.println("Lamport.demande - checking access");
         csGranted = permission(me);
 
         if (!csGranted) {
@@ -77,7 +79,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     }
 
     public Message receive(Message message) {
-        System.out.println("Lamport.receive - un message a été recu de " + message.getSender());
+        System.out.println(String.format("ILamport %d Lamport.receive - received message from %d", numberSite, message.getSender()));
         MessageType messageType = message.getMessageType();
         int timeStamp = message.getTimeStamp();
         int sender = message.getSender();
@@ -116,7 +118,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
 
         if (csGranted && waiting) {
-            System.out.println("Entering the release of lock");
+            System.out.println("Entering the release of the lock");
             waiting = false;
             csGranted = true;
             synchronized (this) {
@@ -144,15 +146,11 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             // Calling the remote method using the obtained object
             return lamport.receive(message);
         } catch (Exception e) {
-            System.err.println("Handler exception: " + e.toString());
+            System.err.println("ILamport exception: " + e.toString());
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    public void test() {
-        System.out.println("Test Lamport");
     }
 
     public int getValue() throws RemoteException {
