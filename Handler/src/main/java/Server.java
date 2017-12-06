@@ -6,6 +6,21 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Locale;
 
+
+/**
+ * BLABLA
+ * - Structure de comment on gère les trucs (genre le common)
+ * - OU est la shared valeur
+ * - Test faits et du sleep
+ * - Comment on gère le nommage des machins RMI
+ * - Reetour de quittance dans RMI
+ * - Hypothèses: tous les gestionnaires sont lancés avant les clients, on connait tous les noms des machins RMI,
+ *
+ * Rename interface en Handler
+ * Rename Lamport en HandlerLamport
+ */
+
+
 /**
  * Classe représentant le gestionnaire de variable partagée. Sa méthode main() va créer l'objet gérant la variable
  * globale avant de le mettre a disposition des autres gestionnaires à l'aide d'un registre RMI.
