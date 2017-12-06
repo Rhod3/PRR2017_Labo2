@@ -1,10 +1,15 @@
 import utils.Constants;
 
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Locale;
 
+/**
+ * Classe représentant le gestionnaire de variable partagée. Sa méthode main() va créer l'objet gérant la variable
+ * globale avant de le mettre a disposition des autres gestionnaires à l'aide d'un registre RMI.
+ */
 public class Server {
 
     public static void main(String args[]) {
@@ -13,28 +18,38 @@ public class Server {
             System.exit(1);
         }
 
+        // Récupération de l'ID du site et du nombre total de site
         int siteId = Integer.parseInt(args[0]);
-        int port = Constants.DEFAULT_PORT;
         int numberOfSites = Integer.parseInt(args[1]);
-        boolean remoteObjectBound = false;
 
         try
         {
-            // Instantiating the implementation class
-            Lamport lamport = new Lamport(siteId, numberOfSites);
+            boolean remoteObjectBound = false;
 
-            // Binding the remote object (stub) in the registry
+            /**
+             * Dans cette boucle, on va essayer de bind notre objet avec l'adresse RMI standard prévue pour ce site.
+             * Si l'on arrive pas à contacter le registre RMI, on en crée un sur le port 1099 (défaut) et on réessaie
+             * le bind. Cela implique qu'en localhost, tous les gestionnaires communiqueront à travers le même
+             * registre RMI.
+             * Sur une implémentation sur des sites distants, les gestionnaires créeront chacun leur registre RMI. Cela
+             * impliquera néanmoins de redéfinir la gestion des adresses URL de registre RMI, par exemple avec un
+             * fichier de config externe permettant de définir facilement les adresses de chacun des sites, plutôt que
+             * de le considérer comme étant constant.
+             */
             while (!remoteObjectBound) {
                 try {
-                    // Registry registry = LocateRegistry.getRegistry(1099);
-                    String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
+                    String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + siteId;
+                    Lamport lamport = new Lamport(siteId, numberOfSites);
                     Naming.rebind(urlLamport, lamport);
 
                     remoteObjectBound = true;
                 }
-                catch (Exception e) {
+                catch (RemoteException e) {
                     System.out.println("No RMI Registry running ! Creating...");
                     LocateRegistry.createRegistry(1099);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 

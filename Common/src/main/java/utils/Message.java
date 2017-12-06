@@ -16,6 +16,12 @@ public class Message implements Serializable {
 
     public Message() {}
 
+    /**
+     * Constructeur
+     * @param messageType Type du message
+     * @param timeStamp Estampille du message
+     * @param sender ID envoyeur
+     */
     public Message(MessageType messageType, int timeStamp, int sender) {
         this.messageType = messageType;
         this.timeStamp = timeStamp;
