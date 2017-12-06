@@ -10,7 +10,7 @@ public class Message implements Serializable {
     // Type du message
     private MessageType messageType;
     // Estampille du message
-    private int timeStamp;
+    private long timeStamp;
     // Envoyeur du message
     private int sender;
 
@@ -22,7 +22,7 @@ public class Message implements Serializable {
      * @param timeStamp Estampille du message
      * @param sender ID envoyeur
      */
-    public Message(MessageType messageType, int timeStamp, int sender) {
+    public Message(MessageType messageType, long timeStamp, int sender) {
         this.messageType = messageType;
         this.timeStamp = timeStamp;
         this.sender = sender;
@@ -48,7 +48,7 @@ public class Message implements Serializable {
      * Récupère l'estampille du message
      * @return L'estampille du message
      */
-    public int getTimeStamp() {
+    public long getTimeStamp() {
         return timeStamp;
     }
 
@@ -56,7 +56,7 @@ public class Message implements Serializable {
      * Définit l'estampille du message
      * @param timeStamp L'estampille
      */
-    public void setTimeStamp(int timeStamp) {
+    public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
 

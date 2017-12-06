@@ -18,7 +18,7 @@ public class MessageFree extends Message {
      * @param sender Envoyeur
      * @param newSharedValue Nouvelle valeur de la variable partagée
      */
-    public MessageFree(MessageType messageType, int timeStamp, int sender, int newSharedValue) {
+    public MessageFree(MessageType messageType, long timeStamp, int sender, int newSharedValue) {
         super(messageType, timeStamp, sender);
         this.newSharedValue = newSharedValue;
     }

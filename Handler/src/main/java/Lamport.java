@@ -10,17 +10,22 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class Lamport extends UnicastRemoteObject implements ILamport {
 
-    private MessageType[] fileMessage;
-    private int[] fileTimeStamp;
-    private int numberSite;
-    private int me;
-    private int logicalClock;
-    private boolean csGranted;
-    private int sharedValue;
+    private MessageType[] fileMessage; // tableau contenant les messages des différents sites
+    private long[] fileTimeStamp; // tableau contenant les estampilles des différents sites
+    private int numberSite; // le nombre de site
+    private int me; // notre valeur
+    private long logicalClock; // notre horloge logique
+    private boolean csGranted; // Définit si on a l'accès à la section critique
+    private int sharedValue; // la valeur partagée entre les sites.
 
-    private boolean waiting = false;
+    private boolean waiting = false; // Permet de bloquer l'application tant que la section critique n'est pas disponible
 
-
+    /**
+     * Construit le protocle de Lamport
+     * @param personalNumber La valeur de ce site
+     * @param numberSite Le nombre de site totale
+     * @throws RemoteException
+     */
     public Lamport(int personalNumber, int numberSite) throws RemoteException {
         super();
         this.numberSite = numberSite;
@@ -28,22 +33,32 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         this.logicalClock = 0;
         this.csGranted = false;
         fileMessage = new MessageType[numberSite];
-        fileTimeStamp = new int[numberSite];
+        fileTimeStamp = new long[numberSite];
     }
 
-    public boolean permission(int me) {
+    /**
+     * Vérifie si notre site à la permission d'entrer en section critique
+     * @return
+     */
+    private boolean permission() {
         boolean granted = true;
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
                 granted &= fileTimeStamp[me] < fileTimeStamp[j] || (fileTimeStamp[me] == fileTimeStamp[j] && me < j);
 
-                if (!granted)
+                if (!granted) {
                     break;
+                }
             }
         }
         return granted;
     }
 
+    /**
+     * Demande la permission d'accéder à la section critique. Si la permission n'est pas instantanément attribuée
+     * Il sera mis en attente et réveillé lorsque la permission aura été aquise.
+     * @throws InterruptedException
+     */
     synchronized public void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
@@ -51,21 +66,28 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
+                /* Lorsqu'on envoie un message, on profite de RMI pour directement récupérer la quitance.
+                 * On recupère donc la réponse et on appelle la fonction receive pour la traiter
+                 */
                 Message receipt = send(MessageType.REQUEST, j);
                 receive(receipt);
             }
         }
-
         System.out.println("Lamport.demande - checking access");
-        csGranted = permission(me);
+        csGranted = permission();
 
         if (!csGranted) {
             System.out.println("Waiting for SC");
             waiting = true;
-            wait(); // We are notified by the receive method, where csGranted is set to true.
+            wait(); // on est notifié et reveillé quand la section critique est accordée (dans la méthode receive)
         }
     }
 
+    /**
+     * Permet de relacher la section critique ainsi que de notifier les autres sites que l'on a libéré la section critique
+     * Permet également de transmettre la nouvelle valeur de la variable partagée aux autres sites.
+     * @param newSharedValue La nouvelle valeur de la variable partagée
+     */
     public void end(int newSharedValue) {
         fileMessage[me] = MessageType.FREE;
         fileTimeStamp[me] = logicalClock;
@@ -78,10 +100,16 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         csGranted = false;
     }
 
+    /**
+     * Permet de géré le traitement de la récéption des messages, selon Lamport.
+     * Si le message reçu est une requête, alors la méthode retournera le message de quitance.
+     * @param message Le message reçu
+     * @return Un message de quitance ou null.
+     */
     public Message receive(Message message) {
         System.out.println(String.format("ILamport %d Lamport.receive - received message from %d", numberSite, message.getSender()));
         MessageType messageType = message.getMessageType();
-        int timeStamp = message.getTimeStamp();
+        long timeStamp = message.getTimeStamp();
         int sender = message.getSender();
 
         Message messageRet = null;
@@ -94,6 +122,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 fileMessage[sender] = MessageType.REQUEST;
                 fileTimeStamp[sender] = timeStamp;
 
+                /* On crée le message de la quitance avant de le retourner. */
                 messageRet = new Message(MessageType.RECEIPT, logicalClock, me);
 
                 break;
@@ -111,16 +140,19 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 fileMessage[sender] = MessageType.FREE;
                 fileTimeStamp[sender] = timeStamp;
 
+                /* Dans le cas d'un message de libération, le message contiendra en plus la nouveelle valeur de la
+                 * variable partagée. */
                 sharedValue = ((MessageFree) message).getNewSharedValue();
                 break;
         }
 
-        csGranted = fileMessage[me] == MessageType.REQUEST && permission(me);
+        csGranted = fileMessage[me] == MessageType.REQUEST && permission();
 
+        /* Si on a accès à la section critique et qu'on était en train d'attendre de la recevoir. On va réveiller le thread
+         * Pour que le client puisse finalement modifier la variable. */
         if (csGranted && waiting) {
             System.out.println("Entering the release of the lock");
             waiting = false;
-            csGranted = true;
             synchronized (this) {
                 notify();
             }
@@ -129,14 +161,37 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         return messageRet;
     }
 
+    /**
+     * Méthode privée qui permet de construire le bon message qui sera envoyé.
+     *
+     * @param messageType Le type du messasge
+     * @param sharedValue La nouvelle valeur de la variable partagée
+     * @param destination Le site de destination du message
+     * @return Le message de réponse du site
+     */
     private Message send(MessageType messageType, int sharedValue, int destination) {
         return send(new MessageFree(messageType, logicalClock, me, sharedValue), destination);
     }
 
+    /**
+     * Méthode privée qui permet de construire le bon message qui sera envoyé.
+     *
+     * @param messageType Le type du messasge
+     * @param destination Le site de destination du message
+     * @return Le message de réponse du site
+     */
     private Message send(MessageType messageType, int destination) {
         return send(new Message(messageType, logicalClock, me), destination);
     }
 
+    /**
+     * Permet d'envoyer un message à un site
+     *
+     * @param message Le messasge à envoyerm (Contient le type du message, l'estampille, l'envoyeur et éventuellement la
+     *                nouvelle valeur de la variable partagée)
+     * @param destination Le site de destination du message
+     * @return Le message de réponse du site
+     */
     private Message send(Message message, int destination) {
         try {
             // Looking up the registry for the remote object
@@ -153,11 +208,23 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         return null;
     }
 
+    /**
+     * Méthode permettant de récupérer la valeur de la variable partagée
+     * @return La valeur de la variable partagée
+     * @throws RemoteException
+     */
     public int getValue() throws RemoteException {
         System.out.println("Value got by App : " + sharedValue);
         return sharedValue;
     }
 
+    /**
+     * Modifie la valeur de la variable partagée (juste localement. le changement sera envoyé lors du FREE)
+     * Une fois le changement effectué, on endort le thread pendant 10s pour avoir le temps de bien tester avec plusieurs sites
+     *
+     * @param value la nouvelle valeur de la variable partagée
+     * @throws RemoteException
+     */
     public void setValue(int value) throws RemoteException {
         try {
             demande();
@@ -172,5 +239,4 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             e.printStackTrace();
         }
     }
-
 }
