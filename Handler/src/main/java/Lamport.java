@@ -64,10 +64,6 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         }
     }
 
-    public void waitDuringCs() {
-
-    }
-
     public void end(int newSharedValue) {
         fileMessage[me] = MessageType.FREE;
         fileTimeStamp[me] = logicalClock;
@@ -157,6 +153,25 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
     public void test() {
         System.out.println("Test Lamport");
+    }
+
+    public int getValue() throws RemoteException {
+        System.out.println("Value got by App : " + sharedValue);
+        return sharedValue;
+    }
+
+    public void setValue(int value) throws RemoteException {
+        try {
+            demande();
+
+            System.out.println("Value set to : " + value);
+            this.sharedValue = value;
+
+            end(value);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

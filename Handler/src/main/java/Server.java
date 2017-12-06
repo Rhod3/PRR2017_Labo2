@@ -22,16 +22,14 @@ public class Server {
         {
             // Instantiating the implementation class
             Lamport lamport = new Lamport(siteId, numberOfSites);
-            AppCom appCom = new AppCom(siteId);
 
             // Binding the remote object (stub) in the registry
             while (!remoteObjectBound) {
                 try {
                     // Registry registry = LocateRegistry.getRegistry(1099);
                     String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
-                    String urlAppCom = Constants.LOCALHOST_RMI_URL + port + "/AppCom" + siteId;
                     Naming.rebind(urlLamport, lamport);
-                    Naming.rebind(urlAppCom, appCom);
+
                     remoteObjectBound = true;
                 }
                 catch (Exception e) {

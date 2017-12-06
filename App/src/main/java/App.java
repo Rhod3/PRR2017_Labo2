@@ -1,4 +1,3 @@
-import remoteInterfaces.IAppCom;
 import remoteInterfaces.ILamport;
 import utils.Constants;
 
@@ -21,14 +20,10 @@ public class App {
             // Registry registry = LocateRegistry.getRegistry(1099);
 
             // Looking up the registry for the remote object
-            String urlAppCom = Constants.LOCALHOST_RMI_URL + port + "/AppCom" + siteId;
-            IAppCom appCom = (IAppCom) Naming.lookup(urlAppCom);
-
             String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
             ILamport lamport = (ILamport) Naming.lookup(urlLamport);
 
             // Calling the remote method using the obtained object
-            appCom.test();
             lamport.test();
 
             Scanner sc = new Scanner(System.in);
@@ -39,11 +34,11 @@ public class App {
                 if (input.contains("set"))
                 {
                     System.out.print("Please enter a new value: ");
-                    appCom.setValue(sc.nextInt());
+                    lamport.setValue(sc.nextInt());
                     System.out.println("New value set !");
                 }
                 else if (input.contains("get")) {
-                    System.out.println("Current global value : " + appCom.getValue());
+                    System.out.println("Current global value : " + lamport.getValue());
                 }
                 displayCommands();
             }
