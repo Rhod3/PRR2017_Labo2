@@ -1,4 +1,4 @@
-import remoteInterfaces.ILamport;
+import remoteInterfaces.IHandler;
 import utils.Constants;
 import utils.Message;
 import utils.MessageFree;
@@ -9,10 +9,10 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 /**
- * Classe représentant un gestionnaire de variable partagée utilisant l'algorithme de Lamport pour gérer
+ * Classe représentant un gestionnaire de variable partagée utilisant l'algorithme de LamportHandler pour gérer
  * l'exclusion mutuelle de l'accès à cette variable partagée.
  */
-public class Lamport extends UnicastRemoteObject implements ILamport {
+public class LamportHandler extends UnicastRemoteObject implements IHandler {
 
     // Tableau contenant les messages des différents sites
     private MessageType[] fileMessage;
@@ -34,12 +34,12 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     private boolean waiting = false;
 
     /**
-     * Construit le gestionnaire de variable partagée utilisant Lamport
+     * Construit le gestionnaire de variable partagée utilisant LamportHandler
      * @param personalNumber La valeur de ce site
      * @param numberSite Le nombre de site total
      * @throws RemoteException
      */
-    public Lamport(int personalNumber, int numberSite) throws RemoteException {
+    public LamportHandler(int personalNumber, int numberSite) throws RemoteException {
         super();
         this.numberSite = numberSite;
         this.me = personalNumber;
@@ -72,10 +72,10 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
      * Il sera mis en attente et réveillé lorsque la permission aura été aquise.
      * @throws InterruptedException
      */
-    synchronized public void demande() throws InterruptedException {
+    synchronized private void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
-        System.out.println("Lamport.demande - Sending request and receiving receipt");
+        System.out.println("LamportHandler.demande - Sending request and receiving receipt");
 
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
@@ -86,7 +86,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 receive(receipt);
             }
         }
-        System.out.println("Lamport.demande - checking access");
+        System.out.println("LamportHandler.demande - checking access");
         csGranted = permission();
 
         if (!csGranted) {
@@ -101,7 +101,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
      * Permet également de transmettre la nouvelle valeur de la variable partagée aux autres sites.
      * @param newSharedValue La nouvelle valeur de la variable partagée
      */
-    public void end(int newSharedValue) {
+    private void end(int newSharedValue) {
         fileMessage[me] = MessageType.FREE;
         fileTimeStamp[me] = logicalClock;
 
@@ -114,13 +114,13 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     }
 
     /**
-     * Permet de gérer le traitement de la recéption des messages, selon Lamport.
+     * Permet de gérer le traitement de la recéption des messages, selon LamportHandler.
      * Si le message reçu est une requête, alors la méthode retournera le message de quittance.
      * @param message Le message reçu
      * @return Un message de quittance ou null.
      */
     public Message receive(Message message) {
-        System.out.println(String.format("ILamport %d Lamport.receive - received message from %d", numberSite, message.getSender()));
+        System.out.println(String.format("IHandler %d LamportHandler.receive - received message from %d", numberSite, message.getSender()));
         MessageType messageType = message.getMessageType();
         long timeStamp = message.getTimeStamp();
         int sender = message.getSender();
@@ -131,7 +131,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
         switch (messageType) {
             case REQUEST:
-                System.out.println("Lamport.receive - request");
+                System.out.println("LamportHandler.receive - request");
                 fileMessage[sender] = MessageType.REQUEST;
                 fileTimeStamp[sender] = timeStamp;
 
@@ -141,7 +141,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 break;
 
             case RECEIPT:
-                System.out.println("Lamport.receive - receipt");
+                System.out.println("LamportHandler.receive - receipt");
                 if (fileMessage[sender] != MessageType.REQUEST) {
                     fileMessage[sender] = MessageType.RECEIPT;
                     fileTimeStamp[sender] = timeStamp;
@@ -149,7 +149,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 break;
 
             case FREE:
-                System.out.println("Lamport.receive - free");
+                System.out.println("LamportHandler.receive - free");
                 fileMessage[sender] = MessageType.FREE;
                 fileTimeStamp[sender] = timeStamp;
 
@@ -209,12 +209,12 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         try {
             // Looking up the registry for the remote object
             String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + destination;
-            ILamport lamport = (ILamport) Naming.lookup(urlLamport);
+            IHandler lamport = (IHandler) Naming.lookup(urlLamport);
 
             // Calling the remote method using the obtained object
             return lamport.receive(message);
         } catch (Exception e) {
-            System.err.println("ILamport exception: " + e.toString());
+            System.err.println("IHandler exception: " + e.toString());
             e.printStackTrace();
         }
 

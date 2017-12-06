@@ -3,8 +3,6 @@ import utils.Constants;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.util.Locale;
 
 
 /**
@@ -15,9 +13,6 @@ import java.util.Locale;
  * - Comment on gère le nommage des machins RMI
  * - Reetour de quittance dans RMI
  * - Hypothèses: tous les gestionnaires sont lancés avant les clients, on connait tous les noms des machins RMI,
- *
- * Rename interface en Handler
- * Rename Lamport en HandlerLamport
  */
 
 
@@ -54,7 +49,7 @@ public class Server {
             while (!remoteObjectBound) {
                 try {
                     String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + siteId;
-                    Lamport lamport = new Lamport(siteId, numberOfSites);
+                    LamportHandler lamport = new LamportHandler(siteId, numberOfSites);
                     Naming.rebind(urlLamport, lamport);
 
                     remoteObjectBound = true;

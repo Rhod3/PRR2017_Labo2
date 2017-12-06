@@ -1,4 +1,4 @@
-import remoteInterfaces.ILamport;
+import remoteInterfaces.IHandler;
 import utils.Constants;
 
 import java.rmi.Naming;
@@ -22,7 +22,7 @@ public class App {
         try {
             // Le serveur est déjà lancé, donc l'object /Lamport+siteId est déjà disponible sur le rmiregistry
             String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + siteId;
-            ILamport lamport = (ILamport) Naming.lookup(urlLamport);
+            IHandler lamport = (IHandler) Naming.lookup(urlLamport);
 
             // Gestion de la GUI en ligne de commande
             Scanner scanner = new Scanner(System.in);
