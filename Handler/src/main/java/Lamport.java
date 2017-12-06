@@ -11,10 +11,10 @@ import java.rmi.server.UnicastRemoteObject;
 public class Lamport extends UnicastRemoteObject implements ILamport {
 
     private MessageType[] fileMessage; // tableau contenant les messages des différents sites
-    private int[] fileTimeStamp; // tableau contenant les estampilles des différents sites
+    private long[] fileTimeStamp; // tableau contenant les estampilles des différents sites
     private int numberSite; // le nombre de site
     private int me; // notre valeur
-    private int logicalClock; // notre horloge logique
+    private long logicalClock; // notre horloge logique
     private boolean csGranted; // Définit si on a l'accès à la section critique
     private int sharedValue; // la valeur partagée entre les sites.
 
@@ -33,7 +33,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         this.logicalClock = 0;
         this.csGranted = false;
         fileMessage = new MessageType[numberSite];
-        fileTimeStamp = new int[numberSite];
+        fileTimeStamp = new long[numberSite];
     }
 
     /**
@@ -62,7 +62,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     synchronized public void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
-        System.out.println("Lamport.demande - envoie des messages et récupération des receipt");
+        System.out.println("Lamport.demande - Sending request and receiving receipt");
+
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
                 /* Lorsqu'on envoie un message, on profite de RMI pour directement récupérer la quitance.
@@ -72,7 +73,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 receive(receipt);
             }
         }
-        System.out.println("Lamport.demande - récupération de la permission");
+        System.out.println("Lamport.demande - checking access");
         csGranted = permission();
 
         if (!csGranted) {
@@ -106,9 +107,9 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
      * @return Un message de quitance ou null.
      */
     public Message receive(Message message) {
-        System.out.println("Lamport.receive - un message a été recu de " + message.getSender());
+        System.out.println(String.format("ILamport %d Lamport.receive - received message from %d", numberSite, message.getSender()));
         MessageType messageType = message.getMessageType();
-        int timeStamp = message.getTimeStamp();
+        long timeStamp = message.getTimeStamp();
         int sender = message.getSender();
 
         Message messageRet = null;
@@ -150,7 +151,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
         /* Si on a accès à la section critique et qu'on était en train d'attendre de la recevoir. On va réveiller le thread
          * Pour que le client puisse finalement modifier la variable. */
         if (csGranted && waiting) {
-            System.out.println("Entering the release of lock");
+            System.out.println("Entering the release of the lock");
             waiting = false;
             synchronized (this) {
                 notify();
@@ -200,15 +201,11 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
             // Calling the remote method using the obtained object
             return lamport.receive(message);
         } catch (Exception e) {
-            System.err.println("Handler exception: " + e.toString());
+            System.err.println("ILamport exception: " + e.toString());
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    public void test() {
-        System.out.println("Test Lamport");
     }
 
     /**

@@ -4,6 +4,11 @@ import utils.Constants;
 import java.rmi.Naming;
 import java.util.Scanner;
 
+/**
+ * La classe App représente une tâche applicative d'un site. Elle contient une méthode main() qui présente
+ * à un utilisateur une GUI en ligne de commande. Les commandes possible sont "GET" et "SET", et elles permettent
+ * respectivement de récupérer ou de modifier la valeur de la variable globale.
+ */
 public class App {
 
     public static void main(String[] args) {
@@ -13,16 +18,13 @@ public class App {
         }
 
         int siteId = Integer.parseInt(args[0]);
-        int port = Constants.DEFAULT_PORT;
 
         try {
-            // Looking up the registry for the remote object
-            String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
+            // Le serveur est déjà lancé, donc l'object /Lamport+siteId est déjà disponible sur le rmiregistry
+            String urlLamport = Constants.LOCALHOST_RMI_URL + Constants.DEFAULT_PORT + "/Lamport" + siteId;
             ILamport lamport = (ILamport) Naming.lookup(urlLamport);
 
-            // Calling the remote method using the obtained object
-            lamport.test();
-
+            // Gestion de la GUI en ligne de commande
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 printInfo();
@@ -35,7 +37,8 @@ public class App {
                     lamport.setValue(scanner.nextInt());
                     System.out.println("New value set !");
                     if (scanner.hasNextLine()){
-                        scanner.nextLine(); // To flush the last /n
+                        // Gérer un éventuel /n quand on a entré la nouvelle valeur
+                        scanner.nextLine();
                     }
                 }
                 else if (input.contains("get")) {
@@ -49,6 +52,9 @@ public class App {
         }
     }
 
+    /**
+     * Méthode privée permettant d'afficher les commandes disponibles
+     */
     private static void printInfo() {
         System.out.println();
         System.out.println("Please enter either :");

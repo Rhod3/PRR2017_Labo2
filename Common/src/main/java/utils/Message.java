@@ -2,40 +2,70 @@ package utils;
 
 import java.io.Serializable;
 
+/**
+ * Classe représentant un message. Ce message sera transmis entre à travers RMI entre différents gestionnaires
+ * de variable partagée afin de coordonner l'accès à l'exclusion mutuelle.
+ */
 public class Message implements Serializable {
+    // Type du message
     private MessageType messageType;
-    private int timeStamp;
+    // Estampille du message
+    private long timeStamp;
+    // Envoyeur du message
     private int sender;
 
-    public Message() {
-    }
+    public Message() {}
 
-    public Message(MessageType messageType, int timeStamp, int sender) {
+    public Message(MessageType messageType, long timeStamp, int sender) {
         this.messageType = messageType;
         this.timeStamp = timeStamp;
         this.sender = sender;
     }
 
+    /**
+     * Récupère le type du message
+     * @return Le type du message
+     */
     public MessageType getMessageType() {
         return messageType;
     }
 
+    /**
+     * Définit le type du message
+     * @param messageType Le type du message
+     */
     public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
     }
 
-    public int getTimeStamp() {
+    /**
+     * Récupère l'estampille du message
+     * @return L'estampille du message
+     */
+    public long getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(int timeStamp) {
+    /**
+     * Définit l'estampille du message
+     * @param timeStamp L'estampille
+     */
+    public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
 
+    /**
+     * Récupère l'envoyeur du message
+     * @return L'ID de l'envoyeur du message
+     */
     public int getSender() {
         return sender;
     }
 
+    /**
+     * Définit l'envoyeur du message
+     * @param sender L'ID de l'envoyeur du message
+     */
     public void setSender(int sender) {
         this.sender = sender;
     }

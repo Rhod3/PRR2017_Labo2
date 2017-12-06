@@ -6,7 +6,6 @@ import java.rmi.RemoteException;
 import utils.Message;
 
 public interface ILamport extends Remote {
-    void test() throws RemoteException;
     int getValue() throws RemoteException;
     void setValue(int value) throws RemoteException;
     void demande() throws InterruptedException, RemoteException;

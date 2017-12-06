@@ -1,12 +1,14 @@
 package utils;
 
+/**
+ * Sous-classe de message utilisé uniquement pour représenter 
+ */
 public class MessageFree extends Message {
     private int newSharedValue;
 
-    public MessageFree() {
-    }
+    public MessageFree() {}
 
-    public MessageFree(MessageType messageType, int timeStamp, int sender, int newSharedValue) {
+    public MessageFree(MessageType messageType, long timeStamp, int sender, int newSharedValue) {
         super(messageType, timeStamp, sender);
         this.newSharedValue = newSharedValue;
     }
