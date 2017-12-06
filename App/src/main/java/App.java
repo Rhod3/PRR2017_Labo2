@@ -3,6 +3,7 @@ import remoteInterfaces.ILamport;
 import utils.Constants;
 
 import java.rmi.Naming;
+import java.util.Scanner;
 
 public class App {
 
@@ -30,17 +31,33 @@ public class App {
             appCom.test();
             lamport.test();
 
-            System.out.println(String.format("App %d, Value before set: %s", siteId, appCom.getValue()));
-            appCom.getCriticalSectionExclusion();
-            System.out.println("Critical Section is ready. Writing the new value...");
-            appCom.setValue(2);
-            System.out.println("Value is written. Releasing critical section...");
-            appCom.releaseCriticalSectionExclusion();
-            System.out.println(String.format("App %d, Value after set: %s", siteId, appCom.getValue()));
+            Scanner sc = new Scanner(System.in);
+            displayCommands();
+            while (true) {
+                String input = sc.nextLine();
+
+                if (input.contains("set"))
+                {
+                    System.out.print("Please enter a new value: ");
+                    appCom.setValue(sc.nextInt());
+                    System.out.println("New value set !");
+                }
+                else if (input.contains("get")) {
+                    System.out.println("Current global value : " + appCom.getValue());
+                }
+                displayCommands();
+            }
         }
         catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
         }
+    }
+
+    private static void displayCommands() {
+        System.out.println("===== Commands ====");
+        System.out.println("set : set new value");
+        System.out.println("get : display value");
+        System.out.print("> ");
     }
 }
