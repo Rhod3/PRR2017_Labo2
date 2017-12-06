@@ -32,7 +32,9 @@ public class App {
 
             System.out.println(String.format("App %d, Value before set: %s", siteId, appCom.getValue()));
             appCom.getCriticalSectionExclusion();
+            System.out.println("Critical Section is ready. Writing the new value...");
             appCom.setValue(2);
+            System.out.println("Value is written. Releasing critical section...");
             appCom.releaseCriticalSectionExclusion();
             System.out.println(String.format("App %d, Value after set: %s", siteId, appCom.getValue()));
         }

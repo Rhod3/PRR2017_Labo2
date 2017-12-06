@@ -47,15 +47,17 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     public void demande() throws InterruptedException {
         fileMessage[me] = MessageType.REQUEST;
         fileTimeStamp[me] = ++logicalClock;
+        System.out.println("Lamport.demande - envoie des messages et récupération des receipt");
         for (int j = 0; j < numberSite; ++j) {
             if (j != me) {
                 Message receipt = send(MessageType.REQUEST, j);
                 receive(receipt);
             }
         }
-
+        System.out.println("Lamport.demande - récupération de la permission");
         csGranted = permission(me);
         if (!csGranted) {
+            System.out.println("Lamport.demande - il faut attendre");
             waiting = true;
             wait(); // We are notified by the receive method, where csGranted is set to true.
         }
@@ -78,6 +80,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     }
 
     public Message receive(Message message) {
+        System.out.println("Lamport.receive - un message a été recu de " + message.getSender());
         MessageType messageType = message.getMessageType();
         int timeStamp = message.getTimeStamp();
         int sender = message.getSender();
@@ -88,14 +91,16 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
         switch (messageType) {
             case REQUEST:
+                System.out.println("Lamport.receive - request");
                 fileMessage[sender] = MessageType.REQUEST;
                 fileTimeStamp[sender] = timeStamp;
 
-                messageRet = new Message(MessageType.RECEIPT, logicalClock, sender);
+                messageRet = new Message(MessageType.RECEIPT, logicalClock, me);
 
                 break;
 
             case RECEIPT:
+                System.out.println("Lamport.receive - receipt");
                 if (fileMessage[sender] != MessageType.REQUEST) {
                     fileMessage[sender] = MessageType.RECEIPT;
                     fileTimeStamp[sender] = timeStamp;
@@ -103,6 +108,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 break;
 
             case FREE:
+                System.out.println("Lamport.receive - free");
                 fileMessage[sender] = MessageType.FREE;
                 fileTimeStamp[sender] = timeStamp;
 

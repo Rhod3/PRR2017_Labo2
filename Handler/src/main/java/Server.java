@@ -12,6 +12,7 @@ public class Server {
             System.out.println("Invalid arguments, you need to pass a site ID and the total number of site");
             System.exit(1);
         }
+
         int siteId = Integer.parseInt(args[0]);
         int port = Constants.DEFAULT_PORT;
         int numberOfSites = Integer.parseInt(args[1]);
