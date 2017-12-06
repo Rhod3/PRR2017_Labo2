@@ -166,6 +166,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
             System.out.println("Value set to : " + value);
             this.sharedValue = value;
+            Thread.sleep(10000);
 
             end(value);
         }

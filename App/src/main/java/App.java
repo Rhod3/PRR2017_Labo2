@@ -16,9 +16,6 @@ public class App {
         int port = Constants.DEFAULT_PORT;
 
         try {
-            // Getting the registry
-            // Registry registry = LocateRegistry.getRegistry(1099);
-
             // Looking up the registry for the remote object
             String urlLamport = Constants.LOCALHOST_RMI_URL + port + "/Lamport" + siteId;
             ILamport lamport = (ILamport) Naming.lookup(urlLamport);
@@ -26,21 +23,24 @@ public class App {
             // Calling the remote method using the obtained object
             lamport.test();
 
-            Scanner sc = new Scanner(System.in);
-            displayCommands();
+            Scanner scanner = new Scanner(System.in);
             while (true) {
-                String input = sc.nextLine();
+                printInfo();
+                String input = scanner.nextLine();
+                input = input.toLowerCase();
 
                 if (input.contains("set"))
                 {
-                    System.out.print("Please enter a new value: ");
-                    lamport.setValue(sc.nextInt());
+                    System.out.print("Enter a new value: ");
+                    lamport.setValue(scanner.nextInt());
                     System.out.println("New value set !");
+                    if (scanner.hasNextLine()){
+                        scanner.nextLine(); // To flush the last /n
+                    }
                 }
                 else if (input.contains("get")) {
                     System.out.println("Current global value : " + lamport.getValue());
                 }
-                displayCommands();
             }
         }
         catch (Exception e) {
@@ -49,10 +49,11 @@ public class App {
         }
     }
 
-    private static void displayCommands() {
-        System.out.println("===== Commands ====");
-        System.out.println("set : set new value");
-        System.out.println("get : display value");
+    private static void printInfo() {
+        System.out.println();
+        System.out.println("Please enter either :");
+        System.out.println("SET to set a new shared value");
+        System.out.println("GET to display the current shared value");
         System.out.print("> ");
     }
 }
