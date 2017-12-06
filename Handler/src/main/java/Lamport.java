@@ -8,22 +8,35 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * Classe représentant un gestionnaire de variable partagée utilisant l'algorithme de Lamport pour gérer
+ * l'exclusion mutuelle de l'accès à cette variable partagée.
+ */
 public class Lamport extends UnicastRemoteObject implements ILamport {
 
-    private MessageType[] fileMessage; // tableau contenant les messages des différents sites
-    private long[] fileTimeStamp; // tableau contenant les estampilles des différents sites
-    private int numberSite; // le nombre de site
-    private int me; // notre valeur
-    private long logicalClock; // notre horloge logique
-    private boolean csGranted; // Définit si on a l'accès à la section critique
-    private int sharedValue; // la valeur partagée entre les sites.
+    // Tableau contenant les messages des différents sites
+    private MessageType[] fileMessage;
+    // Tableau contenant les estampilles des différents sites
+    private long[] fileTimeStamp;
+    // Le nombre total de site(s)
+    private int numberSite;
+    // ID du gestionnaire
+    private int me;
+    // Horloge logique du gestionnaire
+    private long logicalClock;
+    // Définit si on a l'accès à la section critique
+    private boolean csGranted;
+    // La valeur partagée entre les sites. Par simplification, nous avons choisi le type int. Idéalement,
+    // on aurait pu définir un type de variable générique.
+    private int sharedValue;
 
-    private boolean waiting = false; // Permet de bloquer l'application tant que la section critique n'est pas disponible
+    // Permet de bloquer l'application tant que la section critique n'est pas disponible
+    private boolean waiting = false;
 
     /**
-     * Construit le protocle de Lamport
+     * Construit le gestionnaire de variable partagée utilisant Lamport
      * @param personalNumber La valeur de ce site
-     * @param numberSite Le nombre de site totale
+     * @param numberSite Le nombre de site total
      * @throws RemoteException
      */
     public Lamport(int personalNumber, int numberSite) throws RemoteException {
@@ -38,7 +51,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
     /**
      * Vérifie si notre site à la permission d'entrer en section critique
-     * @return
+     * @return Si le gestionnaire a l'accès à la variable partagée
      */
     private boolean permission() {
         boolean granted = true;
@@ -84,7 +97,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     }
 
     /**
-     * Permet de relacher la section critique ainsi que de notifier les autres sites que l'on a libéré la section critique
+     * Permet de relâcher la section critique ainsi que de notifier les autres sites que l'on a libéré la section critique
      * Permet également de transmettre la nouvelle valeur de la variable partagée aux autres sites.
      * @param newSharedValue La nouvelle valeur de la variable partagée
      */
@@ -101,10 +114,10 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     }
 
     /**
-     * Permet de géré le traitement de la récéption des messages, selon Lamport.
-     * Si le message reçu est une requête, alors la méthode retournera le message de quitance.
+     * Permet de gérer le traitement de la recéption des messages, selon Lamport.
+     * Si le message reçu est une requête, alors la méthode retournera le message de quittance.
      * @param message Le message reçu
-     * @return Un message de quitance ou null.
+     * @return Un message de quittance ou null.
      */
     public Message receive(Message message) {
         System.out.println(String.format("ILamport %d Lamport.receive - received message from %d", numberSite, message.getSender()));
@@ -140,7 +153,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
                 fileMessage[sender] = MessageType.FREE;
                 fileTimeStamp[sender] = timeStamp;
 
-                /* Dans le cas d'un message de libération, le message contiendra en plus la nouveelle valeur de la
+                /* Dans le cas d'un message de libération, le message contiendra en plus la nouvelle valeur de la
                  * variable partagée. */
                 sharedValue = ((MessageFree) message).getNewSharedValue();
                 break;
@@ -148,8 +161,8 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
 
         csGranted = fileMessage[me] == MessageType.REQUEST && permission();
 
-        /* Si on a accès à la section critique et qu'on était en train d'attendre de la recevoir. On va réveiller le thread
-         * Pour que le client puisse finalement modifier la variable. */
+        /* Si on a accès à la section critique et qu'on était en train d'attendre de la recevoir,
+        on va réveille le thread pour que le client puisse finalement modifier la variable. */
         if (csGranted && waiting) {
             System.out.println("Entering the release of the lock");
             waiting = false;
@@ -164,7 +177,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     /**
      * Méthode privée qui permet de construire le bon message qui sera envoyé.
      *
-     * @param messageType Le type du messasge
+     * @param messageType Le type du message
      * @param sharedValue La nouvelle valeur de la variable partagée
      * @param destination Le site de destination du message
      * @return Le message de réponse du site
@@ -176,7 +189,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     /**
      * Méthode privée qui permet de construire le bon message qui sera envoyé.
      *
-     * @param messageType Le type du messasge
+     * @param messageType Le type du message
      * @param destination Le site de destination du message
      * @return Le message de réponse du site
      */
@@ -187,7 +200,7 @@ public class Lamport extends UnicastRemoteObject implements ILamport {
     /**
      * Permet d'envoyer un message à un site
      *
-     * @param message Le messasge à envoyerm (Contient le type du message, l'estampille, l'envoyeur et éventuellement la
+     * @param message Le messasge à envoyer (Contient le type du message, l'estampille, l'envoyeur et éventuellement la
      *                nouvelle valeur de la variable partagée)
      * @param destination Le site de destination du message
      * @return Le message de réponse du site
