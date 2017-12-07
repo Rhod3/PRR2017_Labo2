@@ -5,7 +5,7 @@
  * Notre laboratoire est structuré en 3 modules:
  * - un module App, qui représente une tâche applicative
  * - un module Handler, qui représente le gestionnaire de variable globale
- * - un module Common, qui contient tout les éléments commun au module App et Handler
+ * - un module Common, qui contient tous les éléments communs aux modules App et Handler
  * Ces 3 modules sont nécessaires pour exécuter un site du système réparti.
  *
  * Afin de mettre en place le système réparti à N sites, il faut procéder de la manière suivant:
@@ -23,13 +23,13 @@
  *
  * Nous avons décidé de placer la variable partagée dans la classe LamportHandler. Pour ce laboratoire, cette
  * variable est de type int pour rester simple. Idéalement, le type aurait pu être générique.
- * Les tâches applicatives peuvent donc accéder à cet variable et la modifier en proposant une nouvelle valeur.
- * Par ailleurs, la variable partagée est par défaut initialisé à 0.
+ * Les tâches applicatives peuvent donc accéder à cette variable et la modifier en proposant une nouvelle valeur.
+ * Par ailleurs, la variable partagée est par défaut initialisée à 0.
  *
  * Pour tester le bon fonctionnement de notre application, nous avons testé plusieurs scénarios:
- * Le premier est le nombre de sites différents fonctionnant en parallèles. Nous avons tester pour 1 à 3 sites.
+ * Le premier est le nombre de sites différents fonctionnant en parallèles. Nous avons testé pour 1 à 3 sites.
  * Dans tous les cas, nous arrivions bien à récupérer l'accès à la section critique et à modifier la valeur
- * de la variable partagée. Nous avons de plus vérifier que la variable récupérée par les autres sites après
+ * de la variable partagée. Nous avons de plus vérifié   que la variable récupérée par les autres sites après
  * modification soit bien la nouvelle valeur (elle est donc bien mise à jour dans chaque site).
  * Nous avons ensuite fait en sorte que la section critique prenne du temps à être traitée. En effet, nous tenions
  * à vérifier que lorsqu'un site fait une requête alors qu'un autre site se trouve actuellement en section critique,
@@ -39,7 +39,7 @@
  * Nous avons également pu tester que lorsqu'un site demande à modifier la variable, les autres sites peuvent continuer
  * sans problème à pouvoir lire la variable partagée.
  *
- * Nous avons finalement tester l'ordre des accès à la section critique (en utilisant 3 sites distincs). Le site 1 a
+ * Nous avons finalement tester l'ordre des accès à la section critique (en utilisant 3 sites distincts). Le site 1 a
  * fait la demande d'accès et s'est retrouvé en section critique. Pendant qu'il est en section critique, le site 3 émet
  * une requête. Puis le site 2 fait de même. Les sites 2 et 3 sont donc en attente de la libération de la section
  * critique par le site 1.
