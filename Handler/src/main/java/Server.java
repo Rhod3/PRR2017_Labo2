@@ -16,8 +16,8 @@
  * === Commentaires ===
  * Dans notre laboratoire, la gestion des URL des différents RMI registry est la suivante: chaque Server va mettre
  * à disposition un object LamportHandler à l'adresse rmi://localhost:1099/LamportX , où X est l'ID du site
- * que l'on souhaite joindre. Ainsi, notre système réparti est uniquement utilisable en local sur une seule machine en
- * l'état: il faudrait changer la gestion des adresses RMI pour que l'on puisse indiquer à chaque site ou se
+ * que l'on souhaite joindre. Ainsi, notre système réparti est uniquement utilisable en local sur une seule machine
+ * en l'état: il faudrait changer la gestion des adresses RMI pour que l'on puisse indiquer à chaque site ou se
  * situe les autres sites (par exemple à l'aide d'un fichier de configuration externe) que l'on donnerait à
  * chaque site à leur démarrage.
  *
@@ -36,8 +36,8 @@
  * qu'il attende bien la libération avant de se lancer dans la section critique. Pour prolonger la section critique,
  * nous avons donc "fait dormir" le thread pendant 10 secondes.
  *
- * Nous avons également pu tester que lorsqu'un site demande à modifier la variable, les autres sites peuvent continuer
- * sans problème à pouvoir lire la variable partagée.
+ * Nous avons également pu tester que lorsqu'un site demande à modifier la variable, les autres sites peuvent
+ * continuer sans problème à pouvoir lire la variable partagée.
  *
  * Nous avons finalement tester l'ordre des accès à la section critique (en utilisant 3 sites distincs). Le site 1 a
  * fait la demande d'accès et s'est retrouvé en section critique. Pendant qu'il est en section critique, le site 3 émet
