@@ -242,7 +242,7 @@ public class LamportHandler extends UnicastRemoteObject implements IHandler {
         try {
             demande();
 
-            System.out.println("Value set to : " + value);
+            System.out.println(String.format("Value set from %d to %d", sharedValue, value));
             this.sharedValue = value;
             Thread.sleep(10000);
 
